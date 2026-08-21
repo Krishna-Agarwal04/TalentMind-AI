@@ -1,0 +1,16 @@
+{
+    "weights": {
+        "cross_encoder_score": 0.35,
+        "embedding_score": 0.15,
+        "skill_match_score": 0.25,
+        "experience_score": 0.15,
+        "behavior_score": 0.10
+    },
+    "business_rules": {
+        "honeypot_penalty": 100.0,
+        "keyword_stuffer_penalty": 50.0
+    },
+    "engine": {
+        "final_score_scale": 100
+    }
+}
