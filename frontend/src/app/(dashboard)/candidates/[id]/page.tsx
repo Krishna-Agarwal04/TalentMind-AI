@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -52,7 +54,6 @@ export default function CandidateProfilePage({
     if (!candidate) return;
     setActiveAction('propose_outreach');
     try {
-      // Create outreach proposal directly for candidate
       await apiClient.post('/approvals/approve', {
         action_type: 'EMAIL_CANDIDATE',
         target_id: candidate.id,
@@ -67,7 +68,6 @@ export default function CandidateProfilePage({
       await fetchCandidateApprovals();
       setTimeout(() => setActionSuccess(null), 4000);
     } catch (e) {
-      // Fallback message
       setActionSuccess('Outreach proposed successfully!');
       setTimeout(() => setActionSuccess(null), 3000);
     } finally {
