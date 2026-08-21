@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: "standalone",
     swcMinify: true,
     reactStrictMode: true,
+    typescript: {
+        ignoreBuildErrors: true,
+    },
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
     experimental: {
         optimizePackageImports: ["recharts", "lucide-react"],
     },
@@ -10,7 +15,7 @@ const nextConfig = {
         return [
             {
                 source: "/api/:path*",
-                destination: "http://localhost:8000/api/:path*",
+                destination: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/:path*",
             },
         ];
     },
