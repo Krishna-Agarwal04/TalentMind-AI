@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "TalentMind AI Backend"
     VERSION: str = "0.1.0"
     API_V1_STR: str = "/api/v1"
-    BACKEND_CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
+    BACKEND_CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000,*"
     
     # Database
     DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
@@ -17,9 +17,9 @@ class Settings(BaseSettings):
     NEO4J_PASSWORD: str = "CHANGE_ME"
     
     # Auth
-    JWT_SECRET: str = "CHANGE_ME_TO_A_LONG_RANDOM_SECRET"
+    JWT_SECRET: str = "talentmind_super_secret_jwt_key_2026"
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
     # AI Provider
     GEMMA_API_BASE: str = "http://localhost:11434/v1"
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     def cors_origins(self) -> List[str]:
         raw = (self.BACKEND_CORS_ORIGINS or "").strip()
         if not raw:
-            return []
+            return ["*"]
 
         if raw.startswith("["):
             try:
