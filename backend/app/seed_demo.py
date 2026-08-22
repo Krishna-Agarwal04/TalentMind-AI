@@ -173,7 +173,7 @@ async def seed_demo_data():
         await db.execute(delete(Job))
         await db.execute(delete(Candidate).where(Candidate.email.like("%@example.com")))
         
-        # Seed Demo User
+        # Seed Demo User (Always ensure recruiter@talentmind.ai has password123)
         user_res = await db.execute(select(User).where(User.email == "recruiter@talentmind.ai"))
         existing_user = user_res.scalar_one_or_none()
         if not existing_user:
@@ -186,6 +186,10 @@ async def seed_demo_data():
                 is_active=True
             )
             db.add(demo_user)
+        else:
+            logger.info("Updating Demo User password: recruiter@talentmind.ai ...")
+            existing_user.hashed_password = get_password_hash("password123")
+            existing_user.is_active = True
         
         await db.commit()
         

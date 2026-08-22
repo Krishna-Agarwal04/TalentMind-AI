@@ -26,7 +26,6 @@ class LoginResponse(BaseModel):
 
 @router.post("/register", response_model=LoginResponse)
 async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db)):
-    # Check if user already exists
     result = await db.execute(select(User).where(User.email == request.email))
     existing_user = result.scalars().first()
     if existing_user:
@@ -65,14 +64,25 @@ async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
     user = result.scalars().first()
     
     if not user or not verify_password(request.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-        )
+        # Auto-create/seed demo user if login fails for default demo email
+        if request.email == "recruiter@talentmind.ai" and request.password == "password123":
+            try:
+                from app.seed_demo import seed_demo_data
+                await seed_demo_data()
+                
+                # Retry fetching user after seed
+                retry_res = await db.execute(select(User).where(User.email == request.email))
+                user = retry_res.scalars().first()
+            except Exception as e:
+                pass
+                
+        if not user or not verify_password(request.password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password",
+            )
         
     token = create_access_token(subject=str(user.id), role=user.role.value)
-    
-    # We don't store "name" explicitly in the base User model in some setups, but assuming we just use email prefix if missing
     name = getattr(user, 'name', user.email.split("@")[0].title())
     
     return {
@@ -85,3 +95,12 @@ async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
             "name": name
         }
     }
+
+@router.post("/seed")
+async def trigger_seed():
+    """
+    Public helper endpoint to seed demo user and initial database.
+    """
+    from app.seed_demo import seed_demo_data
+    await seed_demo_data()
+    return {"message": "Demo data & recruiter@talentmind.ai seeded successfully!"}
