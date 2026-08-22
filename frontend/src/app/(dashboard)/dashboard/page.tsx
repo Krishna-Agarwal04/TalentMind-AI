@@ -81,7 +81,7 @@ export default function DashboardHomePage() {
                 <Sparkles size={14} className="text-indigo-400" />
                 <span>Deterministic Recruiter Intelligence Platform</span>
               </div>
-              <h1 className="font-display text-3xl font-extrabold tracking-tight text-white lg:text-4xl">
+              <h1 className="font-display text-3xl font-extrabold tracking-tight text-text-primary lg:text-4xl">
                 Talent Pipeline Dashboard
               </h1>
               <p className="text-sm text-text-secondary leading-relaxed">
@@ -134,7 +134,7 @@ export default function DashboardHomePage() {
                   {isPipelineLoading && idx === 3 ? (
                     <Skeleton className="h-9 w-24 bg-white/10" />
                   ) : (
-                    <h3 className="text-3xl font-extrabold font-display text-white tracking-tight">{stat.value}</h3>
+                    <h3 className="text-3xl font-extrabold font-display text-text-primary tracking-tight">{stat.value}</h3>
                   )}
                 </div>
                 

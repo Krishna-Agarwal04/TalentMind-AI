@@ -32,8 +32,8 @@ export function Sidebar() {
           <Sparkles size={16} className="text-white" />
         </div>
         <div>
-          <h2 className="text-base font-display font-bold tracking-tight text-white leading-tight">TalentMind AI</h2>
-          <p className="text-[10px] font-mono text-indigo-400 uppercase tracking-widest font-semibold">Intelligence Workspace</p>
+          <h2 className="text-base font-display font-bold tracking-tight text-text-primary leading-tight">TalentMind AI</h2>
+          <p className="text-[10px] font-mono text-indigo-500 uppercase tracking-widest font-semibold">Intelligence Workspace</p>
         </div>
       </div>
 
