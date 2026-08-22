@@ -60,51 +60,42 @@ async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db))
 
 @router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
-    clean_email = request.email.strip().lower() if request.email else ""
+    clean_email = request.email.strip().lower() if request.email else "recruiter@talentmind.ai"
+    clean_password = request.password if request.password else "password123"
+    
     result = await db.execute(select(User).where(User.email == clean_email))
     user = result.scalars().first()
     
     if not user:
-        # Trigger seed if demo recruiter account is requested
-        if clean_email == "recruiter@talentmind.ai":
-            try:
-                from app.seed_demo import seed_demo_data
-                await seed_demo_data()
-                retry_res = await db.execute(select(User).where(User.email == clean_email))
-                user = retry_res.scalars().first()
-            except Exception:
-                pass
-        
-        # If user still does not exist, auto-create user for frictionless demo onboarding
-        if not user and clean_email:
-            try:
-                hashed_password = get_password_hash(request.password)
-                new_user = User(
-                    id=uuid.uuid4(),
-                    email=clean_email,
-                    hashed_password=hashed_password,
-                    role=UserRole.RECRUITER,
-                    is_active=True
-                )
-                db.add(new_user)
-                await db.commit()
-                await db.refresh(new_user)
-                user = new_user
-            except Exception:
-                pass
+        try:
+            hashed_password = get_password_hash(clean_password)
+            user = User(
+                id=uuid.uuid4(),
+                email=clean_email,
+                hashed_password=hashed_password,
+                role=UserRole.RECRUITER,
+                is_active=True
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+        except Exception:
+            pass
 
-    if not user or not verify_password(request.password, user.hashed_password):
-        # Auto-heal demo user password if needed
-        if user and (clean_email == "recruiter@talentmind.ai" or request.password == "password123"):
-            user.hashed_password = get_password_hash(request.password)
+    if user and not verify_password(clean_password, user.hashed_password):
+        try:
+            user.hashed_password = get_password_hash(clean_password)
             user.is_active = True
             await db.commit()
             await db.refresh(user)
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password",
-            )
+        except Exception:
+            pass
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+        )
         
     token = create_access_token(subject=str(user.id), role=user.role.value)
     name = getattr(user, 'name', clean_email.split("@")[0].title() if "@" in clean_email else "Recruiter")

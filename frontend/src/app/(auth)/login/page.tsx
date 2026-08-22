@@ -41,9 +41,29 @@ export default function LoginPage() {
     }
   };
 
-  const handleAutoFillDemo = () => {
+  const handleAutoFillDemo = async () => {
     setEmail('recruiter@talentmind.ai');
     setPassword('password123');
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await authApi.login({ email: 'recruiter@talentmind.ai', password: 'password123' });
+      login(data.access_token, data.user);
+      router.push('/dashboard');
+    } catch (err: any) {
+      if (err?.response) {
+        const detail = err.response.data?.detail;
+        setError(typeof detail === 'string' ? detail : 'Failed to login');
+      } else {
+        console.error(`[auth] Login request failed. API base URL = ${getApiBaseUrl()}`, err);
+        setError(
+          `Cannot reach the server at ${getApiBaseUrl()}. ` +
+            'Check that NEXT_PUBLIC_API_URL points to your backend and that the backend is running.'
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
