@@ -84,6 +84,16 @@ app.include_router(auth.router, prefix=f"{settings.API_V1_STR}")
 app.include_router(agent.router, prefix=f"{settings.API_V1_STR}")
 app.include_router(approvals.router, prefix=f"{settings.API_V1_STR}/approvals", tags=["approvals"])
 
+@app.get("/")
+async def root():
+    return {
+        "name": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "status": "online",
+        "docs": "/docs",
+        "health": f"{settings.API_V1_STR}/health"
+    }
+
 @app.get("/api/v1/seed")
 @app.post("/api/v1/seed")
 async def seed_database_endpoint():
@@ -93,4 +103,5 @@ async def seed_database_endpoint():
         return {"status": "success", "message": "Demo data (jobs, candidates, approvals) seeded successfully!"}
     except Exception as e:
         return {"status": "warning", "message": f"Seeding completed with notice: {e}"}
+
 
