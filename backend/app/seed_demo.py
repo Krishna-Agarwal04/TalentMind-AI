@@ -9,7 +9,7 @@ from app.models.job import Job
 from app.models.candidate import Candidate
 from app.models.match import Match
 from app.models.action import ActionProposal
-from app.models.enums import JobStatus, ActionStatus, ActionType
+from app.models.enums import JobStatus, ActionStatus, ActionType, UserRole
 from app.core.security import get_password_hash
 
 logger = logging.getLogger(__name__)
@@ -182,7 +182,7 @@ async def seed_demo_data():
                 id=uuid.uuid4(),
                 email="recruiter@talentmind.ai",
                 hashed_password=get_password_hash("password123"),
-                role="RECRUITER",
+                role=UserRole.RECRUITER,
                 is_active=True
             )
             db.add(demo_user)
@@ -289,12 +289,16 @@ async def seed_demo_data():
         db.add_all([proposal1, proposal2, proposal3])
         await db.commit()
 
-        # Auto-index candidates into FAISS
-        from app.ai.retrieval.service import RetrievalService
-        formatted_cands = [{'candidate_id': str(c.id), 'profile': c.profile_jsonb or {}} for c in seeded_candidates]
-        RetrievalService().index_candidates(formatted_cands)
+        # Auto-index candidates into FAISS (safely handle memory limits on container hosting)
+        try:
+            from app.ai.retrieval.service import RetrievalService
+            formatted_cands = [{'candidate_id': str(c.id), 'profile': c.profile_jsonb or {}} for c in seeded_candidates]
+            RetrievalService().index_candidates(formatted_cands)
+            logger.info("FAISS candidate indexing completed successfully.")
+        except Exception as faiss_err:
+            logger.warning(f"FAISS indexing skipped during seed: {faiss_err}")
         
-        logger.info("Demo User, Jobs, Candidates, and Action Proposals seeded & indexed successfully!")
+        logger.info("Demo User, Jobs, Candidates, and Action Proposals seeded successfully!")
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

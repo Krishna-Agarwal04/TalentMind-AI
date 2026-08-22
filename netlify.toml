@@ -3,5 +3,9 @@
   command = "npm run build"
   publish = ".next"
 
+[build.environment]
+  NEXT_PUBLIC_API_URL = "https://talentmind-backend-ye9y.onrender.com/api/v1"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+

@@ -1,7 +1,17 @@
 import axios from 'axios';
 
 export function getApiBaseUrl(): string {
-  let url = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1').trim();
+  let url = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+
+  // Automatic intelligent fallback for Netlify and non-localhost deployments
+  if (!url) {
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      url = 'https://talentmind-backend-ye9y.onrender.com/api/v1';
+    } else {
+      url = 'http://localhost:8000/api/v1';
+    }
+  }
+
   url = url.replace(/\/+$/, '');
   if (!url.endsWith('/api/v1')) {
     url = `${url}/api/v1`;
