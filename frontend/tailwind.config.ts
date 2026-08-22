@@ -14,6 +14,12 @@ const config: Config = {
         primary: "var(--primary)",
         "accent-blue": "var(--accent-blue)",
         "accent-purple": "var(--accent-purple)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "text-muted": "var(--text-muted)",
+        success: "var(--success)",
+        warning: "var(--warning)",
+        error: "var(--error)",
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
