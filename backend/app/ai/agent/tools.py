@@ -93,13 +93,7 @@ def retrieve_candidates_tool(job_description: str, top_k: int = 20) -> List[Dict
             res = await db.execute(stmt)
             return res.scalars().all()
             
-    try:
-        db_candidates = asyncio.run(fetch_candidates())
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        db_candidates = loop.run_until_complete(fetch_candidates())
-        loop.close()
+    db_candidates = run_async(fetch_candidates())
         
     hydrated = []
     found_ids = set()
@@ -173,6 +167,15 @@ def finalize_and_fuse_tool(candidates: List[Dict[str, Any]]) -> List[Dict[str, A
 
 from typing import Optional
 
+def run_async(coro):
+    import asyncio
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
+
 @tool
 def propose_action_tool(action_type: str, target_id: str, reason: str, payload: Dict[str, Any], job_id: Optional[str] = None) -> str:
     """
@@ -180,7 +183,6 @@ def propose_action_tool(action_type: str, target_id: str, reason: str, payload: 
     The action is saved in a PENDING_APPROVAL state.
     A human must review and approve it before execution can occur.
     """
-    import asyncio
     from app.database.session import AsyncSessionLocal
     from app.models.action import ActionProposal
     from app.models.enums import ActionType
@@ -192,8 +194,16 @@ def propose_action_tool(action_type: str, target_id: str, reason: str, payload: 
             except ValueError:
                 return f"Invalid action_type: {action_type}. Allowed: {[e.value for e in ActionType]}"
             
+            import uuid
+            j_uuid = None
+            if job_id:
+                try:
+                    j_uuid = uuid.UUID(job_id) if isinstance(job_id, str) else job_id
+                except ValueError:
+                    j_uuid = None
+
             proposal = ActionProposal(
-                job_id=job_id,
+                job_id=j_uuid,
                 action_type=action_enum,
                 target_id=target_id,
                 reason=reason,
@@ -203,23 +213,7 @@ def propose_action_tool(action_type: str, target_id: str, reason: str, payload: 
             await session.commit()
             return f"Action {action_type} proposed for target {target_id}. Status is PENDING_APPROVAL. Execution is paused waiting for human approval."
     
-    # Run async function in sync tool
-    loop = asyncio.get_event_loop()
-    if loop.is_running():
-        # This occurs if called from an async context like FastAPI
-        import nest_asyncio
-        nest_asyncio.apply()
-    
-    # We must use asyncio.run to execute the coroutine if no event loop, 
-    # but since this might be run in an async context by LangGraph's asyncio.to_thread,
-    # we can use a helper or just run it.
-    try:
-        return asyncio.run(_save_action())
-    except RuntimeError:
-        # Event loop is running in thread
-        import nest_asyncio
-        nest_asyncio.apply()
-        return asyncio.run(_save_action())
+    return run_async(_save_action())
 
 
 @tool
@@ -250,12 +244,7 @@ def get_job_context_tool(job_id: str) -> Dict[str, Any]:
                 "candidate_count": candidate_count,
             }
 
-    try:
-        return asyncio.run(_fetch())
-    except RuntimeError:
-        import nest_asyncio
-        nest_asyncio.apply()
-        return asyncio.run(_fetch())
+    return run_async(_fetch())
 
 
 @tool

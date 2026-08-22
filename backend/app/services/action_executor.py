@@ -56,11 +56,11 @@ async def execute_action(
     # 1. Strict security check - will raise if not exactly APPROVED
     action = await assert_action_approved(db, action_id)
 
-    # 1.5. Minimal authorization boundary:
-    # If an approver identity is present, only that approver or an admin can execute.
-    if action.approved_by is not None and actor_role != "ADMIN":
-        if not actor_user_id or str(action.approved_by) != str(actor_user_id):
-            raise ForbiddenError("Action execution blocked: You are not authorized to execute this approved action.")
+    # 1.5. Authorization boundary: Any authorized recruiter or admin can execute approved actions
+    if actor_role not in ["RECRUITER", "ADMIN"]:
+        if action.approved_by is not None and actor_user_id:
+            if str(action.approved_by).lower() != str(actor_user_id).lower():
+                raise ForbiddenError("Action execution blocked: You are not authorized to execute this approved action.")
     
     # 2. Dispatch execution
     try:

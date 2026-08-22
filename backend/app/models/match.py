@@ -30,4 +30,4 @@ class Match(Base):
 
     # Relationships
     job = relationship("Job", back_populates="matches")
-    candidate = relationship("Candidate")
+    candidate = relationship("Candidate", overlaps="matches")
