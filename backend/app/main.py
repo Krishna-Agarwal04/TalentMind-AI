@@ -32,6 +32,15 @@ async def lifespan(app: FastAPI):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("database_tables_initialized")
+
+        # Auto-seed demo data if DB has no users
+        try:
+            from app.seed_demo import seed_demo_data
+            await seed_demo_data()
+            logger.info("demo_data_seeded_automatically")
+        except Exception as seed_err:
+            logger.warning(f"auto_seed_notice: {seed_err}")
+
     except Exception as e:
         logger.warning(f"database_table_init_notice: {e}")
     
