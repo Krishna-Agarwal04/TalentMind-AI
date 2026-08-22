@@ -163,6 +163,8 @@ async def extract_requirements(file: UploadFile = File(...)):
 async def match_job(job_id: uuid.UUID):
     return {"status": "ok"}
 
+from sqlalchemy.orm import joinedload
+
 @router.get("/{job_id}/matches", response_model=list[MatchResponse])
 async def get_matches(
     job_id: uuid.UUID,
@@ -173,7 +175,12 @@ async def get_matches(
     Retrieves the persisted ranked candidates (matches) from the database for the given job.
     Auto-generates matches if none exist.
     """
-    result = await db.execute(select(Match).filter(Match.job_id == job_id).order_by(Match.final_score.desc()))
+    result = await db.execute(
+        select(Match)
+        .options(joinedload(Match.candidate))
+        .filter(Match.job_id == job_id)
+        .order_by(Match.final_score.desc())
+    )
     matches = result.scalars().all()
     
     if not matches:
@@ -181,7 +188,12 @@ async def get_matches(
         job = job_res.scalars().first()
         if job:
             await run_ranking_pipeline_task(job_id, job.description or "Senior Engineer")
-            result = await db.execute(select(Match).filter(Match.job_id == job_id).order_by(Match.final_score.desc()))
+            result = await db.execute(
+                select(Match)
+                .options(joinedload(Match.candidate))
+                .filter(Match.job_id == job_id)
+                .order_by(Match.final_score.desc())
+            )
             matches = result.scalars().all()
 
     return matches
