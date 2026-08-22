@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { Brain } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
@@ -8,7 +9,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <header className="fixed top-0 z-50 w-full border-b border-white/5 bg-background/50 backdrop-blur-xl transition-all">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded bg-accent-blue shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 shadow-[0_0_12px_rgba(99,102,241,0.5)]">
+              <Brain size={14} className="text-white" />
+            </div>
             <span className="font-display text-lg font-semibold tracking-tight text-white">TalentMind AI</span>
           </Link>
           <nav className="flex items-center gap-4">

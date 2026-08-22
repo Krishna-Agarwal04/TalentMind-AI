@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Briefcase, Search, Settings, User, CheckSquare } from 'lucide-react';
+import { LayoutDashboard, Users, Briefcase, Search, Settings, User, CheckSquare, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
@@ -24,7 +24,9 @@ export function Sidebar() {
   return (
     <aside className="hidden w-64 flex-col border-r border-white/10 bg-surface md:flex h-screen sticky top-0">
       <div className="flex h-16 items-center gap-3 px-6 border-b border-white/10">
-        <div className="h-6 w-6 rounded-md bg-accent-blue shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 shadow-[0_0_12px_rgba(99,102,241,0.5)]">
+          <Brain size={14} className="text-white" />
+        </div>
         <h2 className="text-lg font-display font-semibold tracking-tight text-white">TalentMind AI</h2>
       </div>
 
