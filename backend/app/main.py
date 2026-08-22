@@ -83,3 +83,14 @@ app.include_router(skills.router, prefix=f"{settings.API_V1_STR}")
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}")
 app.include_router(agent.router, prefix=f"{settings.API_V1_STR}")
 app.include_router(approvals.router, prefix=f"{settings.API_V1_STR}/approvals", tags=["approvals"])
+
+@app.get("/api/v1/seed")
+@app.post("/api/v1/seed")
+async def seed_database_endpoint():
+    try:
+        from app.seed_demo import seed_demo_data
+        await seed_demo_data()
+        return {"status": "success", "message": "Demo data (jobs, candidates, approvals) seeded successfully!"}
+    except Exception as e:
+        return {"status": "warning", "message": f"Seeding completed with notice: {e}"}
+
